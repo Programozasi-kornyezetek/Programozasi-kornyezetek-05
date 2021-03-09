@@ -96,13 +96,68 @@ namespace Programozasi_kornyezetek_05 {
 		}
 		
 		// 2. Készíts programot, ami egy tört értékét számolja ki a számláló és a nevező bekérésével! Készíts saját kivételosztályt, amit meghívol akkor, ha a nevező 0!
+		class Tort {
+			private int szamlalo;
+			private int nevezo;
+			private float ertek;
+
+			class TortKivetel : Exception {
+				private const string Uzenet = "Hiba!";
+
+				public TortKivetel() : base(Uzenet) {
+				}
+
+				public TortKivetel(string uzenet) : base(uzenet) {
+				}
+			}
+
+			public float GetErtek() {
+				ertek = (float) (szamlalo * 1.0 / nevezo);
+				return ertek;
+			}
+			
+			public void Input() {
+				bool inputOk;
+
+				inputOk = false;
+				while (!inputOk) {
+					try {
+						Console.Write("Szamlalo: ");
+						szamlalo = int.Parse(Console.ReadLine());
+						inputOk = true;
+					}
+					catch (Exception e) {
+						Console.WriteLine("Szamot!");
+					}
+				}
+
+				inputOk = false;
+				while (!inputOk) {
+					try {
+						Console.Write("Nevezo: ");
+						nevezo = int.Parse(Console.ReadLine());
+						if (nevezo == 0) throw new TortKivetel("Nevezo ne legyen 0!");
+						inputOk = true;
+					}
+					catch (Exception e) {
+						Console.WriteLine(e);
+						Console.WriteLine("Szamot!");
+					}
+				}
+			}
+		}
+		
 		// 3. Művelet nevű delegált készítése, ami két egész szám között képes összeadást, vagy szorzást elvégezni, a választástól függően!
 		
 		public static void Main(string[] args) {
 			//Exceptions();
 			//Delegates();
-			FelhasznaloExec();
+			//FelhasznaloExec();
 			
+			Tort tort = new Tort();
+			tort.Input();
+			Console.WriteLine("Tort erteke: " + tort.GetErtek());
+
 		}
 	}
 }
