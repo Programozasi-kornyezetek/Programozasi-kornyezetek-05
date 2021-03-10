@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Reflection;
 
 namespace Programozasi_kornyezetek_05 {
 	class SajatKivetel : Exception {
@@ -8,7 +8,7 @@ namespace Programozasi_kornyezetek_05 {
 		public SajatKivetel() : base(Uzenet) {
 		}
 
-		public SajatKivetel(string Uzenet) : base(Uzenet) {
+		public SajatKivetel(string uzenet) : base(uzenet) {
 		}
 	}
 	
@@ -25,6 +25,7 @@ namespace Programozasi_kornyezetek_05 {
 			Console.WriteLine(("Eddat hallgat: " + hallgato));
 		}
 
+		/*
 		public static void Exceptions() {
 			int x = -12;
 			try {
@@ -34,6 +35,7 @@ namespace Programozasi_kornyezetek_05 {
 				Console.WriteLine("Hiba: " + e.Message);
 			}
 		}
+		*/
 
 		public static void Delegates() {
 			// Delegált típusú változó
@@ -47,13 +49,11 @@ namespace Programozasi_kornyezetek_05 {
 		// 1. Kérjük be a felhasználó születési évét, és írjuk ki az életkorát. Abban az esetben, ha érvénytelen számot,
 		// vagy szöveget ad meg, ismételjük a bevitelt!
 		class Felhasznalo {
-			class HibasSzuletesiEv : Exception {
-				private const string Uzenet = "Hibas szuletesi ev!";
+			private class HibasSzuletesiEv : Exception {
+				private const string Uzenet = "Hiba:";
 
-				public HibasSzuletesiEv() : base(Uzenet) {
-				}
-
-				public HibasSzuletesiEv(string Uzenet) : base(Uzenet) {
+				public HibasSzuletesiEv(string uzenet) : base(Uzenet) {
+					Console.WriteLine(Uzenet + " " + uzenet);
 				}
 			}
 			
@@ -73,10 +73,10 @@ namespace Programozasi_kornyezetek_05 {
 						szuletesiEvRendben = true;
 					}
 					catch (FormatException e) {
-						Console.WriteLine("Hibas szuletesi ev!");
+						Console.WriteLine(e.Message);
 					}
 					catch (Exception e) {
-						Console.WriteLine("Hiba: " + e.Message);
+						Console.WriteLine(e.Message);
 					}
 					finally {
 						Console.WriteLine("Bevitt szuletesi ev: " + _szuletesiEv);
@@ -96,24 +96,21 @@ namespace Programozasi_kornyezetek_05 {
 		}
 		
 		// 2. Készíts programot, ami egy tört értékét számolja ki a számláló és a nevező bekérésével! Készíts saját kivételosztályt, amit meghívol akkor, ha a nevező 0!
-		class Tort {
-			private int szamlalo;
-			private int nevezo;
-			private float ertek;
+		private class Tort {
+			private int _szamlalo;
+			private int _nevezo;
+			private float _ertek;
 
-			class TortKivetel : Exception {
-				private const string Uzenet = "Hiba!";
-
-				public TortKivetel() : base(Uzenet) {
-				}
-
-				public TortKivetel(string uzenet) : base(uzenet) {
+			private class TortKivetel : Exception {
+				private const string Uzenet = "Hiba:";
+				public TortKivetel(string uzenet) : base(Uzenet) {
+					Console.WriteLine(Uzenet + " " + uzenet);
 				}
 			}
 
 			public float GetErtek() {
-				ertek = (float) (szamlalo * 1.0 / nevezo);
-				return ertek;
+				_ertek = (float) (_szamlalo * 1.0 / _nevezo);
+				return _ertek;
 			}
 			
 			public void Input() {
@@ -123,10 +120,10 @@ namespace Programozasi_kornyezetek_05 {
 				while (!inputOk) {
 					try {
 						Console.Write("Szamlalo: ");
-						szamlalo = int.Parse(Console.ReadLine());
+						_szamlalo = int.Parse(Console.ReadLine() ?? throw new TortKivetel("Szamot!"));
 						inputOk = true;
 					}
-					catch (Exception e) {
+					catch (Exception) {
 						Console.WriteLine("Szamot!");
 					}
 				}
@@ -135,29 +132,66 @@ namespace Programozasi_kornyezetek_05 {
 				while (!inputOk) {
 					try {
 						Console.Write("Nevezo: ");
-						nevezo = int.Parse(Console.ReadLine());
-						if (nevezo == 0) throw new TortKivetel("Nevezo ne legyen 0!");
+						_nevezo = int.Parse(Console.ReadLine() ?? throw new TortKivetel("Nem 0 szamot!"));
+						if (_nevezo == 0) throw new TortKivetel("Nevezo ne legyen 0!");
 						inputOk = true;
 					}
-					catch (Exception e) {
-						Console.WriteLine(e);
+					catch (Exception) {
 						Console.WriteLine("Szamot!");
 					}
 				}
 			}
 		}
 		
-		// 3. Művelet nevű delegált készítése, ami két egész szám között képes összeadást, vagy szorzást elvégezni, a választástól függően!
+		// 3. Művelet nevű delegált készítése, ami két egész szám között képes összeadást, vagy szorzást elvégezni,
+		// a választástól függően!
+		private class Muveletek {
+			public delegate int Muvelet(int a, int b);
+		
+			// Delegált típusú metódus
+			public static int Osszead(int a, int b) {
+				return a + b;
+			}
+
+			public static int Szoroz(int a, int b) {
+				return a * b;
+			}
+
+			public static string MuveletiJel(string nev) {
+				switch (nev) {
+					case "Osszead": return "+";
+					case "Szoroz": return "*";
+					default: return null;
+				}
+			}
+		}
+
+		private static void TortExec() {
+			Tort tort = new Tort();
+			tort.Input();
+			Console.WriteLine("Tort erteke: " + tort.GetErtek());
+		}
+
+		static void DelegaltMuveletExec() {
+			int a = 3;
+			int b = 4;
+			
+			Muveletek.Muvelet muvelet;
+			
+			muvelet = Muveletek.Osszead;
+			Console.WriteLine(a + " " + Muveletek.MuveletiJel(muvelet.GetMethodInfo().Name) + " " + b + " = " + muvelet(a, b));
+			
+			muvelet = Muveletek.Szoroz;
+			Console.WriteLine(a + " " + Muveletek.MuveletiJel(muvelet.GetMethodInfo().Name) + " " + b + " = " + muvelet(a, b));
+		}
 		
 		public static void Main(string[] args) {
 			//Exceptions();
 			//Delegates();
-			//FelhasznaloExec();
 			
-			Tort tort = new Tort();
-			tort.Input();
-			Console.WriteLine("Tort erteke: " + tort.GetErtek());
-
+			FelhasznaloExec();
+			TortExec();
+			DelegaltMuveletExec();
 		}
 	}
 }
