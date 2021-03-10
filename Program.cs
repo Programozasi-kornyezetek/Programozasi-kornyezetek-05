@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Fábián Gábor
+ * CXNU8T
+ * https://github.com/FabianGabor/Programozasi-kornyezetek-05
+ */
+
+using System;
 using System.Reflection;
 
 namespace Programozasi_kornyezetek_05 {
